@@ -1,0 +1,159 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:QrSnap.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="440" d:DesignHeight="560"
+        x:Class="QrSnap.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="QrSnap 二维码识别"
+        Width="440" Height="560"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        TransparencyLevelHint="Mica, Blur, Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        ExtendClientAreaChromeHints="NoChrome">
+
+  <Design.DataContext>
+    <vm:MainWindowViewModel/>
+  </Design.DataContext>
+
+  <Window.Resources>
+    <LinearGradientBrush x:Key="HeroGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Color="#EBF2FF" Offset="0"/>
+      <GradientStop Color="#F6F1FF" Offset="0.55"/>
+      <GradientStop Color="#FDF6FF" Offset="1"/>
+    </LinearGradientBrush>
+  </Window.Resources>
+
+  <!-- 外层圆角卡片 -->
+  <Border CornerRadius="16" ClipToBounds="True"
+          Background="White"
+          BorderBrush="#1A000000" BorderThickness="1">
+    <Grid RowDefinitions="Auto,*,Auto">
+
+      <!-- 顶部渐变区 -->
+      <Border Grid.Row="0" Background="{StaticResource HeroGradient}" Padding="28,26,28,26">
+        <Grid RowDefinitions="Auto,Auto">
+          <!-- 标题栏（可拖动） -->
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" PointerPressed="OnTitleBarPressed">
+            <Border Grid.Column="0" Width="38" Height="38" CornerRadius="11"
+                    Background="#2F7AFF" VerticalAlignment="Center">
+              <PathIcon Data="M2,2 H10 V10 H2 Z M4,4 H8 V8 H4 Z M12,2 H20 V10 H12 Z M14,4 H18 V8 H14 Z M2,12 H10 V20 H2 Z M4,14 H8 V18 H4 Z M13,13 H16 V16 H13 Z M17,13 H20 V15 H20 V20 H16 V17 H13 V20 H13 V16 H16 V16 Z"
+                        Foreground="White" Width="20" Height="20"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+
+            <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="1">
+              <TextBlock Text="QrSnap" FontSize="17" FontWeight="Bold" Foreground="#12212F"/>
+              <TextBlock Text="截屏识别二维码" FontSize="11.5" Foreground="#7A8798"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Top">
+              <Button Width="30" Height="30" CornerRadius="8" Background="Transparent"
+                      BorderThickness="0" Click="OnMinimize" ToolTip.Tip="最小化">
+                <PathIcon Data="M3,8 H13" Foreground="#7A8798" Width="10" Height="10"/>
+              </Button>
+              <Button Width="30" Height="30" CornerRadius="8" Background="Transparent"
+                      BorderThickness="0" Click="OnClose" ToolTip.Tip="关闭">
+                <PathIcon Data="M4,4 L12,12 M12,4 L4,12" Foreground="#7A8798" Width="10" Height="10"/>
+              </Button>
+            </StackPanel>
+          </Grid>
+
+          <!-- 大标题 -->
+          <StackPanel Grid.Row="1" Margin="0,26,0,0" Spacing="10">
+            <TextBlock Text="扫一下，就读出来" FontSize="27" FontWeight="Bold" Foreground="#12212F"/>
+            <TextBlock Text="按下快捷键，框选屏幕上的二维码，内容立刻呈现在眼前。"
+                       FontSize="13" Foreground="#6B7889" TextWrapping="Wrap" LineHeight="21" MaxWidth="330" HorizontalAlignment="Left"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- 中部：快捷键卡片与说明 -->
+      <StackPanel Grid.Row="1" Margin="28,24,28,0" Spacing="16">
+
+        <!-- 快捷键展示 -->
+        <Border Background="#F7F9FC" CornerRadius="14" Padding="20,18" BorderBrush="#E8EDF4" BorderThickness="1">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Spacing="6" VerticalAlignment="Center">
+              <TextBlock Text="开始识别" FontSize="12.5" Foreground="#8592A3"/>
+              <TextBlock Text="任何窗口下按快捷键" FontSize="11.5" Foreground="#A3AEBD"/>
+            </StackPanel>
+            <Border Grid.Column="1" CornerRadius="9" Background="White"
+                    BorderBrush="#D9E1EC" BorderThickness="1" Padding="14,9">
+              <TextBlock Text="{Binding HotkeyText}" FontSize="15" FontWeight="Bold"
+                         Foreground="#2F7AFF" FontFamily="Consolas, Microsoft YaHei UI"/>
+            </Border>
+          </Grid>
+        </Border>
+
+        <!-- 使用步骤 -->
+        <StackPanel Spacing="10">
+          <StackPanel Orientation="Horizontal" Spacing="11">
+            <Border Width="20" Height="20" CornerRadius="10" Background="#EAF1FF" VerticalAlignment="Top">
+              <TextBlock Text="1" FontSize="11" FontWeight="Bold" Foreground="#2F7AFF"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="按快捷键，屏幕会变暗并显示框选层" FontSize="12.5" Foreground="#5A6472"
+                       TextWrapping="Wrap" VerticalAlignment="Center"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="11">
+            <Border Width="20" Height="20" CornerRadius="10" Background="#EAF1FF" VerticalAlignment="Top">
+              <TextBlock Text="2" FontSize="11" FontWeight="Bold" Foreground="#2F7AFF"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="拖动鼠标框出二维码，双击或按回车确认" FontSize="12.5" Foreground="#5A6472"
+                       TextWrapping="Wrap" VerticalAlignment="Center"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="11">
+            <Border Width="20" Height="20" CornerRadius="10" Background="#EAF1FF" VerticalAlignment="Top">
+              <TextBlock Text="3" FontSize="11" FontWeight="Bold" Foreground="#2F7AFF"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="识别成功后会弹出结果窗，可一键复制或打开" FontSize="12.5" Foreground="#5A6472"
+                       TextWrapping="Wrap" VerticalAlignment="Center"/>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- 支持格式 -->
+        <Border Background="#FAFBFD" CornerRadius="12" Padding="16,13" BorderBrush="#EDF1F6" BorderThickness="1">
+          <StackPanel Spacing="7">
+            <TextBlock Text="支持内容类型" FontSize="11.5" Foreground="#9AA6B5"/>
+            <WrapPanel ItemSpacing="6" LineSpacing="6">
+              <Border CornerRadius="6" Background="#EAF1FF" Padding="8,4">
+                <TextBlock Text="网址" FontSize="11" Foreground="#2F7AFF"/>
+              </Border>
+              <Border CornerRadius="6" Background="#EAF7EF" Padding="8,4">
+                <TextBlock Text="纯文本" FontSize="11" Foreground="#1E9E5A"/>
+              </Border>
+              <Border CornerRadius="6" Background="#FFF4E8" Padding="8,4">
+                <TextBlock Text="WiFi" FontSize="11" Foreground="#D4830A"/>
+              </Border>
+              <Border CornerRadius="6" Background="#F3ECFF" Padding="8,4">
+                <TextBlock Text="名片" FontSize="11" Foreground="#7A4DE0"/>
+              </Border>
+              <Border CornerRadius="6" Background="#FDECF0" Padding="8,4">
+                <TextBlock Text="邮箱 / 电话" FontSize="11" Foreground="#D63C64"/>
+              </Border>
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <!-- 底部操作区 -->
+      <Border Grid.Row="2" Background="#FCFDFE" BorderBrush="#EDF1F6" BorderThickness="0,1,0,0"
+              Padding="28,16">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Text="{Binding StatusText}" FontSize="11.5"
+                     Foreground="#9AA6B5" VerticalAlignment="Center"/>
+          <Button Grid.Column="1" Classes="primary" Command="{Binding StartCaptureCommand}"
+                  Content="立即识别" MinWidth="112"/>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

@@ -1,0 +1,49 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="QrSnap.App"
+             xmlns:local="using:QrSnap"
+             RequestedThemeVariant="Light">
+
+  <Application.DataTemplates>
+    <local:ViewLocator/>
+  </Application.DataTemplates>
+
+  <Application.Styles>
+    <FluentTheme />
+
+    <!-- 通用圆角按钮 -->
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#2F7AFF" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="20,11" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.15" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1E68F0" />
+      <Setter Property="TextBlock.Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.primary:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1656CE" />
+      <Setter Property="TextBlock.Foreground" Value="White" />
+    </Style>
+
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="#00000000" />
+      <Setter Property="Foreground" Value="#5A6472" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#EEF2F8" />
+    </Style>
+  </Application.Styles>
+</Application>

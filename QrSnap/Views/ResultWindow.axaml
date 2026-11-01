@@ -1,0 +1,91 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="420"
+        x:Class="QrSnap.Views.ResultWindow"
+        Title="识别结果"
+        Width="420" SizeToContent="Height" MaxHeight="560"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        TransparencyLevelHint="Mica, Blur, Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        ExtendClientAreaChromeHints="NoChrome"
+        KeyDown="OnKeyDown">
+
+  <Border CornerRadius="16" Background="White" ClipToBounds="True"
+          BorderBrush="#1A000000" BorderThickness="1"
+          BoxShadow="0 12 40 0 #33101828">
+    <Grid RowDefinitions="Auto,Auto,Auto">
+
+      <!-- 顶部色条 -->
+      <Border x:Name="AccentBar" Grid.Row="0" Height="4" Background="#2F7AFF"/>
+
+      <!-- 标题区 -->
+      <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="24,22,18,0">
+        <Border x:Name="IconBox" Grid.Column="0" Width="44" Height="44" CornerRadius="12"
+                Background="#EAF1FF" VerticalAlignment="Top">
+          <PathIcon x:Name="IconPath" Width="20" Height="20" Foreground="#2F7AFF"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Data="M3,9 H12 M9,4 L14,9 L9,14"/>
+        </Border>
+
+        <StackPanel Grid.Column="1" Margin="14,0,8,0" Spacing="3" VerticalAlignment="Center">
+          <TextBlock x:Name="KindLabel" Text="网址链接" FontSize="11.5" Foreground="#93A0B0"/>
+          <TextBlock x:Name="TitleText" Text="example.com" FontSize="18" FontWeight="Bold"
+                     Foreground="#12212F" TextTrimming="CharacterEllipsis"/>
+        </StackPanel>
+
+        <Button Grid.Column="2" Width="30" Height="30" CornerRadius="8" Background="Transparent"
+                BorderThickness="0" Click="OnClose" VerticalAlignment="Top" ToolTip.Tip="关闭">
+          <PathIcon Data="M4,4 L12,12 M12,4 L4,12" Foreground="#9AA6B5" Width="10" Height="10"/>
+        </Button>
+      </Grid>
+
+      <!-- 内容区 -->
+      <StackPanel Grid.Row="2" Margin="24,18,24,22" Spacing="14">
+
+        <TextBlock x:Name="SubtitleText" IsVisible="False" Text=""
+                   FontSize="12.5" Foreground="#6B7889" TextWrapping="Wrap"/>
+
+        <!-- 内容展示框 -->
+        <Border Background="#F7F9FC" CornerRadius="12" Padding="16,14"
+                BorderBrush="#E8EDF4" BorderThickness="1" MaxHeight="220">
+          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <SelectableTextBlock x:Name="ContentText" Text=""
+                                 FontSize="13.5" Foreground="#26323F"
+                                 TextWrapping="Wrap" LineHeight="22"
+                                 FontFamily="Consolas, Microsoft YaHei UI"/>
+          </ScrollViewer>
+        </Border>
+
+        <!-- WiFi 密码专用行 -->
+        <Border x:Name="WifiPanel" IsVisible="False" Background="#FFF9F0" CornerRadius="10"
+                Padding="14,11" BorderBrush="#F5E3C4" BorderThickness="1">
+          <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Column="0" Text="密码" FontSize="12" Foreground="#B07A21" VerticalAlignment="Center"/>
+            <SelectableTextBlock x:Name="WifiPassword" Grid.Column="1" Text="" FontSize="13" FontWeight="SemiBold"
+                                 Foreground="#8A5C10" Margin="14,0,0,0" VerticalAlignment="Center"
+                                 FontFamily="Consolas, Microsoft YaHei UI"/>
+          </Grid>
+        </Border>
+
+        <!-- 元信息 -->
+        <TextBlock x:Name="MetaText" Text="" FontSize="11" Foreground="#A9B4C2"/>
+
+        <!-- 操作按钮 -->
+        <Grid ColumnDefinitions="Auto,*" Margin="0,2,0,0">
+          <Button Grid.Column="0" Classes="ghost" Content="复制" Click="OnCopy"
+                  x:Name="CopyButton" MinWidth="76" BorderThickness="1" BorderBrush="#E1E8F0"/>
+          <Button Grid.Column="1" x:Name="ActionButton" Classes="primary" Content="打开链接"
+                  Click="OnAction" HorizontalAlignment="Right" MinWidth="130" Margin="10,0,0,0"/>
+        </Grid>
+
+        <TextBlock x:Name="CopyHint" Text="" FontSize="11" Foreground="#1E9E5A" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>
