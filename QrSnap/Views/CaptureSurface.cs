@@ -41,6 +41,17 @@ public sealed class CaptureSurface : Control
     private static readonly IBrush HintBg = new SolidColorBrush(Color.FromArgb(230, 32, 36, 44));
     private static readonly IBrush DimText = new SolidColorBrush(Color.FromArgb(170, 255, 255, 255));
 
+    // 主提示条：深色胶囊 + 高亮按钮，保证在任意截图内容上都醒目
+    private static readonly IBrush HintBarBrush = new SolidColorBrush(Color.FromArgb(242, 24, 28, 36));
+    private static readonly IBrush ShadowBrush = new SolidColorBrush(Color.FromArgb(60, 0, 0, 0));
+    private static readonly IBrush HintTextBrush = new SolidColorBrush(Color.FromArgb(215, 255, 255, 255));
+    private static readonly IBrush ConfirmBrush = new SolidColorBrush(Color.FromRgb(0x2F, 0x7A, 0xFF));
+    private static readonly IBrush ConfirmHoverBrush = new SolidColorBrush(Color.FromRgb(0x1E, 0x68, 0xF0));
+
+    /// <summary>"识别"按钮在控件坐标系中的矩形，用于命中测试。</summary>
+    private Rect? _confirmButtonRect;
+    private bool _hoverConfirmButton;
+
     private enum HandleKind { None, Left, Right, Top, Bottom, TopLeft, TopRight, BottomLeft, BottomRight, Move }
 
     public event Action<PixelRect>? SelectionConfirmed;
@@ -151,14 +162,67 @@ public sealed class CaptureSurface : Control
         context.DrawRectangle(HintBg, null, tagRect, 4, 4);
         context.DrawText(text, new Point(x + padX, y + padY - 0.5));
 
-        var tip = new FormattedText("双击或回车识别",
-            System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            new Typeface("Microsoft YaHei UI"), 11, DimText);
-        if (sel.Height > tip.Height + 16 && sel.Width > tip.Width + 16)
-        {
-            context.DrawText(tip, new Point(sel.Left + 8, sel.Bottom - tip.Height - 8));
-        }
+        DrawConfirmHint(context, sel, bounds);
     }
+
+    /// <summary>
+    /// 主提示：选框下方的深色胶囊条，内含高亮的"识别"按钮。
+    /// 悬停按钮时有反馈，可直接点击确认。
+    /// </summary>
+    private void DrawConfirmHint(DrawingContext context, Rect sel, Rect bounds)
+    {
+        // 文案与按钮尺寸
+        var label = new FormattedText("双击 / 回车",
+            System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            new Typeface("Microsoft YaHei UI"), 12.5, HintTextBrush);
+        var action = new FormattedText("识别",
+            System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            new Typeface("Microsoft YaHei UI", FontStyle.Normal, FontWeight.Bold), 12.5, Brushes.White);
+
+        double padX = 12, padY = 8;
+        double btnPadX = 11, btnPadY = 4;
+        double gap = 10;
+
+        double btnW = action.Width + btnPadX * 2;
+        double btnH = action.Height + btnPadY * 2;
+        double barW = padX + label.Width + gap + btnW + padX;
+        double barH = Math.Max(btnH, label.Height) + padY * 2;
+
+        // 优先贴在选框下方，空间不足时放到框内底部
+        double x = sel.Left;
+        double y = sel.Bottom + 10;
+        if (y + barH > bounds.Height) y = sel.Bottom - barH - 10;
+        if (y < 0) y = Math.Max(4, sel.Top + 8);
+        if (x + barW > bounds.Width - 4) x = bounds.Width - barW - 4;
+        x = Math.Max(4, x);
+
+        var barRect = new Rect(x, y, barW, barH);
+
+        // 胶囊底：深色 + 阴影感（先画一层半透明外扩）
+        context.DrawRectangle(ShadowBrush, null, barRect.Inflate(1.5), barH / 2 + 1.5, barH / 2 + 1.5);
+        context.DrawRectangle(HintBarBrush, null, barRect, barH / 2, barH / 2);
+
+        // 左侧文案
+        double textY = y + (barH - label.Height) / 2;
+        context.DrawText(label, new Point(x + padX, textY));
+
+        // 右侧"识别"按钮
+        var btnRect = new Rect(
+            x + padX + label.Width + gap,
+            y + (barH - btnH) / 2,
+            btnW, btnH);
+        _confirmButtonRect = btnRect;
+
+        var btnBg = _hoverConfirmButton ? ConfirmHoverBrush : ConfirmBrush;
+        context.DrawRectangle(btnBg, null, btnRect, btnH / 2, btnH / 2);
+        context.DrawText(action, new Point(
+            btnRect.X + btnPadX,
+            btnRect.Y + (btnH - action.Height) / 2));
+    }
+
+    /// <summary>命中测试：光标是否落在"识别"按钮上。</summary>
+    private bool IsOverConfirmButton(Point pt) =>
+        _confirmButtonRect is { } r && r.Contains(pt);
 
     // ── 交互 ────────────────────────────────────────────────────
 
@@ -186,6 +250,14 @@ public sealed class CaptureSurface : Control
 
         if (_selection is { } sel)
         {
+            // 点击提示条上的"识别"按钮
+            if (IsOverConfirmButton(pt))
+            {
+                Confirm();
+                e.Handled = true;
+                return;
+            }
+
             var handle = HitTest(sel, pt);
             if (handle != HandleKind.None)
             {
@@ -219,6 +291,14 @@ public sealed class CaptureSurface : Control
     {
         base.OnPointerMoved(e);
         var pt = e.GetPosition(this);
+
+        // 悬停"识别"按钮时高亮
+        bool overBtn = IsOverConfirmButton(pt);
+        if (overBtn != _hoverConfirmButton)
+        {
+            _hoverConfirmButton = overBtn;
+            InvalidateVisual();
+        }
 
         if (_isDragging || _activeHandle != HandleKind.None)
         {
@@ -310,6 +390,12 @@ public sealed class CaptureSurface : Control
 
     private void UpdateCursor(Point pt)
     {
+        if (_hoverConfirmButton)
+        {
+            Cursor = new Cursor(StandardCursorType.Hand);
+            return;
+        }
+
         Cursor = _selection is { } sel
             ? HitTest(sel, pt) switch
             {
