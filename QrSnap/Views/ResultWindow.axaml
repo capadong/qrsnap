@@ -5,6 +5,7 @@
         mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="420"
         x:Class="QrSnap.Views.ResultWindow"
         Title="识别结果"
+        Icon="/Assets/qrsnap.ico"
         Width="420" SizeToContent="Height" MaxHeight="560"
         CanResize="False"
         ShowInTaskbar="False"

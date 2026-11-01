@@ -11,6 +11,37 @@
   <Application.Styles>
     <FluentTheme />
 
+    <!-- 窗口按钮：圆形，悬停渐显，关闭键悬停变红 -->
+    <Style Selector="Button.winbtn">
+      <Setter Property="Background" Value="#00000000" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="16" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.12" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.winbtn /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+      <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style Selector="Button.winbtn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#0F8C98A8" />
+    </Style>
+    <Style Selector="Button.winbtn:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1F8C98A8" />
+    </Style>
+    <Style Selector="Button.winbtn.close:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#E5484D" />
+    </Style>
+    <Style Selector="Button.winbtn.close:pointerover Path">
+      <Setter Property="Stroke" Value="White" />
+    </Style>
+
     <!-- 通用圆角按钮 -->
     <Style Selector="Button.primary">
       <Setter Property="Background" Value="#2F7AFF" />

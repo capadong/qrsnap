@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="440" d:DesignHeight="560"
         x:Class="QrSnap.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/qrsnap.ico"
         Title="QrSnap 二维码识别"
         Width="440" Height="560"
         CanResize="False"
@@ -38,8 +38,8 @@
       <!-- 顶部渐变区 -->
       <Border Grid.Row="0" Background="{StaticResource HeroGradient}" Padding="28,26,28,26">
         <Grid RowDefinitions="Auto,Auto">
-          <!-- 标题栏（可拖动） -->
-          <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" PointerPressed="OnTitleBarPressed">
+          <!-- 标题栏（窗口级拖拽在代码后置实现） -->
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
             <Border Grid.Column="0" Width="38" Height="38" CornerRadius="11"
                     Background="#2F7AFF" VerticalAlignment="Center">
               <PathIcon Data="M2,2 H10 V10 H2 Z M4,4 H8 V8 H4 Z M12,2 H20 V10 H12 Z M14,4 H18 V8 H14 Z M2,12 H10 V20 H2 Z M4,14 H8 V18 H4 Z M13,13 H16 V16 H13 Z M17,13 H20 V15 H20 V20 H16 V17 H13 V20 H13 V16 H16 V16 Z"
@@ -52,14 +52,14 @@
               <TextBlock Text="截屏识别二维码" FontSize="11.5" Foreground="#7A8798"/>
             </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Top">
-              <Button Width="30" Height="30" CornerRadius="8" Background="Transparent"
-                      BorderThickness="0" Click="OnMinimize" ToolTip.Tip="最小化">
-                <PathIcon Data="M3,8 H13" Foreground="#7A8798" Width="10" Height="10"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+              <Button Classes="winbtn" Width="32" Height="32" Click="OnMinimize" ToolTip.Tip="最小化">
+                <Path Data="M5,8 H11" Stroke="#8C98A8" StrokeThickness="1.6"
+                      StrokeLineCap="Round" Width="16" Height="16"/>
               </Button>
-              <Button Width="30" Height="30" CornerRadius="8" Background="Transparent"
-                      BorderThickness="0" Click="OnClose" ToolTip.Tip="关闭">
-                <PathIcon Data="M4,4 L12,12 M12,4 L4,12" Foreground="#7A8798" Width="10" Height="10"/>
+              <Button Classes="winbtn close" Width="32" Height="32" Click="OnClose" ToolTip.Tip="关闭">
+                <Path Data="M5.5,5.5 L10.5,10.5 M10.5,5.5 L5.5,10.5" Stroke="#8C98A8" StrokeThickness="1.6"
+                      StrokeLineCap="Round" Width="16" Height="16"/>
               </Button>
             </StackPanel>
           </Grid>
