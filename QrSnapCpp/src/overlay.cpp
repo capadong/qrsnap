@@ -28,6 +28,10 @@ struct OverlayState {
 
     RECT  btnRect{};        // "识别"按钮
     bool  btnHover = false;
+
+    // 双缓冲（避免每帧直接画屏幕导致闪烁）
+    HDC     memDC = nullptr;
+    HBITMAP memBmp = nullptr;
 } g;
 
 // ---------- 几何 ----------
@@ -112,6 +116,17 @@ void DrawGdiplus(HDC hdc) {
     Gdiplus::SolidBrush dim(Gdiplus::Color(110, 0, 0, 0));
     gfx.FillRectangle(&dim, 0, 0, cap.w, cap.h);
 
+    // 恢复选区内原亮度
+    if (g.hasSel) {
+        HDC src = CreateCompatibleDC(hdc);
+        HGDIOBJ ob = SelectObject(src, cap.bitmap);
+        BitBlt(hdc, g.sel.left, g.sel.top,
+               g.sel.right - g.sel.left, g.sel.bottom - g.sel.top,
+               src, g.sel.left, g.sel.top, SRCCOPY);
+        SelectObject(src, ob);
+        DeleteDC(src);
+    }
+
     Gdiplus::Font font(L"Segoe UI", 13.0f);
     Gdiplus::Font smallFont(L"Segoe UI", 11.5f);
     Gdiplus::SolidBrush white(Gdiplus::Color(255, 255, 255, 255));
@@ -142,20 +157,24 @@ void DrawGdiplus(HDC hdc) {
         swprintf(sizeTxt, 64, L"%d × %d", w, h);
         Gdiplus::RectF sb;
         gfx.MeasureString(sizeTxt, -1, &smallFont, Gdiplus::PointF(0, 0), &sb);
-        int capW = (int)sb.Width + 20, capH = 22;
+        int capW = (int)sb.Width + 24, capH = 24;
         int cx = g.sel.left, cy = g.sel.top - capH - 6;
         if (cy < 2) cy = g.sel.top + 6;
-        FillRoundedRect(gfx, cx, cy, capW, capH, 11, Gdiplus::Color(230, 24, 26, 34));
+        FillRoundedRect(gfx, cx, cy, capW, capH, 12, Gdiplus::Color(230, 24, 26, 34));
+        Gdiplus::StringFormat sfC;
+        sfC.SetAlignment(Gdiplus::StringAlignmentCenter);
+        sfC.SetLineAlignment(Gdiplus::StringAlignmentCenter);
         gfx.DrawString(sizeTxt, -1, &smallFont,
-                     Gdiplus::PointF((float)cx + 10, (float)cy + 2), &white);
+                     Gdiplus::RectF((float)cx, (float)cy, (float)capW, (float)capH), &sfC, &white);
 
         // 提示胶囊 + "识别"按钮（选区下方，放不下则上方）
         const wchar_t* hintText = L"双击 / 回车识别";
         Gdiplus::RectF hb;
         gfx.MeasureString(hintText, -1, &font, Gdiplus::PointF(0, 0), &hb);
-        int btnW = 76, btnH = 34, gap = 8, pad = 14;
-        int textW = (int)hb.Width;
-        int totalW = pad + textW + pad + gap + btnW;
+        int btnW = 76, btnH = 34, gap = 8, pad = 16;
+        int textW = (int)hb.Width + 8;            // 余量，确保背景包住文字
+        int capW2 = pad + textW + pad;
+        int totalW = capW2 + gap + btnW;
         int bx = (g.sel.left + g.sel.right) / 2 - totalW / 2;
         int by = g.sel.bottom + 14;
         if (by + btnH > cap.h - 4) by = g.sel.top - btnH - 14;
@@ -163,49 +182,61 @@ void DrawGdiplus(HDC hdc) {
         if (bx + totalW > cap.w - 4) bx = cap.w - 4 - totalW;
         if (by < 4) by = 4;
 
-        FillRoundedRect(gfx, bx, by, pad * 2 + textW + gap + btnW - btnW, btnH, 17,
+        Gdiplus::StringFormat sfC2;
+        sfC2.SetAlignment(Gdiplus::StringAlignmentCenter);
+        sfC2.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+
+        FillRoundedRect(gfx, bx, by, capW2, btnH, 17,
                         Gdiplus::Color(230, 24, 26, 34));
         gfx.DrawString(hintText, -1, &font,
-                     Gdiplus::PointF((float)bx + pad, (float)by + 5), &white);
+                     Gdiplus::RectF((float)bx, (float)by, (float)capW2, (float)btnH), &sfC2, &white);
 
-        int btnX = bx + pad + textW + gap;
+        int btnX = bx + capW2 + gap;
         g.btnRect = {btnX, by, btnX + btnW, by + btnH};
         Gdiplus::Color btnC = g.btnHover ? Gdiplus::Color(255, 90, 152, 250)
                                          : Gdiplus::Color(255, 46, 124, 246);
         FillRoundedRect(gfx, btnX, by, btnW, btnH, 17, btnC);
-        Gdiplus::StringFormat sf;
-        sf.SetAlignment(Gdiplus::StringAlignmentCenter);
-        sf.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-        gfx.DrawString(L"识别", -1, &font, Gdiplus::RectF((float)btnX, (float)by - 1,
-                     (float)btnW, (float)btnH), &sf, &white);
+        gfx.DrawString(L"识别", -1, &font, Gdiplus::RectF((float)btnX, (float)by,
+                     (float)btnW, (float)btnH), &sfC2, &white);
     } else {
         // 未选区：屏幕上方居中提示
         const wchar_t* hintText = L"拖拽框选二维码区域 · 双击或回车识别 · Esc 取消";
         Gdiplus::RectF hb;
         gfx.MeasureString(hintText, -1, &font, Gdiplus::PointF(0, 0), &hb);
-        int capW = (int)hb.Width + 36, capH = 38;
+        int capW = (int)hb.Width + 44, capH = 40;
         int bx = (cap.w - capW) / 2, by = 24;
         g.btnRect = {};
-        FillRoundedRect(gfx, bx, by, capW, capH, 19, Gdiplus::Color(230, 24, 26, 34));
+        FillRoundedRect(gfx, bx, by, capW, capH, 20, Gdiplus::Color(230, 24, 26, 34));
+        Gdiplus::StringFormat sfC3;
+        sfC3.SetAlignment(Gdiplus::StringAlignmentCenter);
+        sfC3.SetLineAlignment(Gdiplus::StringAlignmentCenter);
         gfx.DrawString(hintText, -1, &font,
-                     Gdiplus::PointF((float)bx + 18, (float)by + 7), &white);
+                     Gdiplus::RectF((float)bx, (float)by, (float)capW, (float)capH), &sfC3, &white);
     }
 }
 
 void Paint(HDC hdc) {
     const CapturedScreen& cap = *g.cap;
-    HDC mem = CreateCompatibleDC(hdc);
-    HGDIOBJ oldBmp = SelectObject(mem, cap.bitmap);
-    BitBlt(hdc, 0, 0, cap.w, cap.h, mem, 0, 0, SRCCOPY);
-    if (g.hasSel) {
-        // 恢复选区内原亮度：直接重贴对应区域
-        BitBlt(hdc, g.sel.left, g.sel.top,
-               g.sel.right - g.sel.left, g.sel.bottom - g.sel.top,
-               mem, g.sel.left, g.sel.top, SRCCOPY);
+
+    // 建立并缓存双缓冲位图（整个虚拟桌面大小）
+    if (!g.memDC) {
+        g.memDC = CreateCompatibleDC(hdc);
+        g.memBmp = CreateCompatibleBitmap(hdc, cap.w, cap.h);
+        SelectObject(g.memDC, g.memBmp);
     }
-    SelectObject(mem, oldBmp);
-    DeleteDC(mem);
-    DrawGdiplus(hdc);
+
+    // 1) 贴抓屏背景到缓冲
+    HDC src = CreateCompatibleDC(hdc);
+    HGDIOBJ oldBmp = SelectObject(src, cap.bitmap);
+    BitBlt(g.memDC, 0, 0, cap.w, cap.h, src, 0, 0, SRCCOPY);
+    SelectObject(src, oldBmp);
+    DeleteDC(src);
+
+    // 2) 在缓冲上画遮罩、选区、提示（此时屏幕未被改动）
+    DrawGdiplus(g.memDC);
+
+    // 3) 一次性输出到屏幕
+    BitBlt(hdc, 0, 0, cap.w, cap.h, g.memDC, 0, 0, SRCCOPY);
 }
 
 // ---------- 光标 ----------
@@ -288,6 +319,8 @@ LRESULT CALLBACK OverlayProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
         else if (wParam == VK_ESCAPE) Cancel();
         return 0;
     case WM_DESTROY:
+        if (g.memDC) { DeleteDC(g.memDC); g.memDC = nullptr; }
+        if (g.memBmp) { DeleteObject(g.memBmp); g.memBmp = nullptr; }
         g.hwnd = nullptr;
         return 0;
     }
