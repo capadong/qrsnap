@@ -3,7 +3,7 @@
 > 一个即按即用的 Windows 桌面二维码截屏识别工具 —— 按 `Alt+Q` 唤起截屏框选，识别二维码内容并优雅地展示出来。
 
 <p align="center">
-  <img src="screenshots/cpp-main.png" width="620" alt="主界面">
+  <img src="screenshots/app.png" width="620" alt="主界面">
 </p>
 
 ## ✨ 功能特性
