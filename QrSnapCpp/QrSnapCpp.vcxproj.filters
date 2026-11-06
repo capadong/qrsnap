@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx</Extensions>
+    </Filter>
+    <Filter Include="quirc">
+      <UniqueIdentifier>{6A2C1B9E-8D34-4F5A-9B7C-1E0D3F4A5B6C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\app.cpp"><Filter>源文件</Filter></ClCompile>
+    <ClCompile Include="src\overlay.cpp"><Filter>源文件</Filter></ClCompile>
+    <ClCompile Include="src\qrdecode.cpp"><Filter>源文件</Filter></ClCompile>
+    <ClCompile Include="src\result.cpp"><Filter>源文件</Filter></ClCompile>
+    <ClCompile Include="src\utils.cpp"><Filter>源文件</Filter></ClCompile>
+    <ClCompile Include="quirc\quirc.c"><Filter>quirc</Filter></ClCompile>
+    <ClCompile Include="quirc\decode.c"><Filter>quirc</Filter></ClCompile>
+    <ClCompile Include="quirc\identify.c"><Filter>quirc</Filter></ClCompile>
+    <ClCompile Include="quirc\version_db.c"><Filter>quirc</Filter></ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc"><Filter>资源文件</Filter></ResourceCompile>
+  </ItemGroup>
+</Project>
